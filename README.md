@@ -33,7 +33,7 @@ Modern, production-minded web platform for semantic resume screening. Backend is
 
 Screenshot (placeholder):
 
-![Screenshot](./docs/screenshot.png)
+![Screenshot](./docs/screenshot.jpeg)
 
 > To add a real screenshot, place an image at `docs/screenshot.png` and commit it.
 
