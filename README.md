@@ -1,194 +1,181 @@
-# AetherScreen – AI Resume Screening Platform
+# AI Resume Screening Platform
 
-![Python](https://img.shields.io/badge/Python-3.12-blue)
-![Django](https://img.shields.io/badge/Django-5.1-green)
-![DRF](https://img.shields.io/badge/Django%20REST%20Framework-3.15-red)
-![Celery](https://img.shields.io/badge/Celery-5.4-orange)
-![Docker](https://img.shields.io/badge/Docker-Ready-blue)
+[![Python](https://img.shields.io/badge/Python-3.11%2B-blue)](https://www.python.org/)
+[![Django](https://img.shields.io/badge/Django-5.1-green)](https://www.djangoproject.com/)
+[![DRF](https://img.shields.io/badge/DRF-3.15-red)](https://www.django-rest-framework.org/)
+[![Celery](https://img.shields.io/badge/Celery-5.4-orange)](https://docs.celeryq.dev/)
+[![Docker](https://img.shields.io/badge/Docker-Ready-blue)](https://www.docker.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-**A production-grade AI-powered semantic resume screening SaaS** built with modern Python stack in 2026.
-
----
-
-## ✨ Features
-
-### For Candidates
-- Secure registration & JWT authentication
-- Create candidate profile
-- Upload resume (PDF/DOCX) with automatic text extraction
-- Apply to jobs
-- Track application status
-
-### For Employers
-- Create, update, and manage job postings
-- View all applicants with semantic match scores
-- **AI-powered resume screening** using `all-MiniLM-L6-v2`
-- Shortlist top candidates based on cosine similarity
-- Analytics dashboard (applications per job, shortlist ratio, funnel metrics)
-- Export applicants data as CSV
-
-### AI Engine
-- Uses **Sentence Transformers** (`all-MiniLM-L6-v2`)
-- Semantic matching between resume and job description
-- Async processing with **Celery + Redis**
-- Configurable similarity threshold
-
-### Tech Stack
-- **Backend**: Django 5.1 + Django REST Framework
-- **AI**: `sentence-transformers` + `torch` (CPU)
-- **Async**: Celery + Redis
-- **Database**: PostgreSQL (ready) / SQLite (dev)
-- **Deployment**: Docker + Docker Compose + Nginx + Gunicorn
-- **Auth**: JWT with refresh tokens + role-based access
-- **Documentation**: drf-spectacular (Swagger UI)
+Modern, production-minded web platform for semantic resume screening. Backend is Django + DRF with an AI scoring pipeline; frontend is Vite + React.
 
 ---
 
-## 🚀 Quick Start (Local Development)
+<!-- TOC -->
+## Table of Contents
+- [Demo](#demo)
+- [Features](#features)
+- [Quick Start](#quick-start)
+	- [Backend (dev)](#backend-dev)
+	- [Frontend (dev)](#frontend-dev)
+	- [Docker (full-stack)](#docker-full-stack)
+- [Environment](#environment)
+- [Testing](#testing)
+- [Project Structure](#project-structure)
+- [Contributing](#contributing)
+- [License](#license)
+- [Contact](#contact)
+<!-- /TOC -->
 
-### 1. Clone the repository
-```bash
-git clone https://github.com/maroofiums/AI-Resume-Screening-Platform.git
-cd AI-Resume-Screening-Platform/aetherscreen
-```
+---
 
-### 2. Activate Virtual Environment
+## Demo
+
+Screenshot (placeholder):
+
+![Screenshot](./docs/screenshot.png)
+
+> To add a real screenshot, place an image at `docs/screenshot.png` and commit it.
+
+---
+
+## Features
+
+- AI semantic matching using `sentence-transformers` embeddings
+- Background scoring pipeline with Celery + Redis
+- Resume upload (PDF/DOCX) and text extraction
+- JWT auth, role-based access (candidate / employer)
+- Analytics and CSV export for applicants
+
+---
+
+## Quick Start
+
+These quick instructions get a developer environment running on your machine.
+
+### Backend (dev)
+
+- Path: [Backend/](Backend/) — main entry: [Backend/manage.py](Backend/manage.py)
+
 ```powershell
-python -m venv aetherscreen
-cd aetherscreen
-```
-
-### 3. Install Dependencies
-```powershell
+cd Backend
+python -m venv .venv
+# PowerShell
+.venv\Scripts\Activate.ps1
+# or CMD
+.venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### 4. Run Migrations
-```powershell
-python manage.py makemigrations
-python manage.py migrate
-```
+Create `.env` (see [Environment](#environment)), run migrations and a dev server:
 
-### 5. Run Development Server
 ```powershell
+python manage.py migrate
+python manage.py createsuperuser
 python manage.py runserver
 ```
 
-### 6. Start Celery Worker (in separate terminal)
+Start a Celery worker in a separate terminal:
+
 ```powershell
-celery -A config worker --loglevel=info --pool=solo
+cd Backend
+celery -A config worker -l info --pool=solo
 ```
 
-Open **Swagger UI**: [http://127.0.0.1:8000/api/docs/](http://127.0.0.1:8000/api/docs/)
+Open API docs at `http://127.0.0.1:8000/api/docs/`.
 
 ---
 
-## 🐳 Docker Deployment (Recommended for Production)
+### Frontend (dev)
+
+- Path: [Frontend/](Frontend/) — see [Frontend/package.json](Frontend/package.json)
 
 ```bash
+cd Frontend
+npm install
+npm run dev
+# or with bun:
+bun install
+bun dev
+```
+
+Vite will print the local dev URL (commonly `http://localhost:5173`). If the app needs to call the backend, update the API base URL or add a proxy in `vite.config.ts`.
+
+---
+
+### Docker (full-stack)
+
+The Docker compose file in `Backend/docker-compose.yml` brings up web, postgres, redis, celery and nginx.
+
+```bash
+cd Backend
 docker-compose up --build
 ```
 
-Services included:
-- Web (Gunicorn)
-- Celery Worker
-- PostgreSQL
-- Redis
-- Nginx (reverse proxy)
-
-Access the app at: **http://localhost**
+The site will be available at `http://localhost` once started.
 
 ---
 
-## 📋 Test Flow
+## Environment
 
-1. **Register as Candidate** → Create Profile → Upload Resume
-2. **Register as Employer** → Create Profile → Post a Job
-3. Candidate applies to the job
-4. AI screening runs automatically in background
-5. Employer views ranked candidates with similarity scores
-6. Check analytics at `/api/analytics/`
-
----
-
-## 📁 Project Structure
-
-```
-aetherscreen/
-├── config/                 # Django settings, celery, urls
-├── users/                  # Custom User + JWT Auth
-├── candidates/             # Profile + Resume upload
-├── employers/              # Company profile + jobs
-├── jobs/                   # Job postings
-├── applications/           # Job applications
-├── resumes/                # Resume storage & extraction
-├── screening/              # AI scoring + Celery tasks
-├── analytics/              # Reports & export
-├── common/services/        # Reusable services (Extractor, AIScorer)
-├── docker/                 # Nginx config
-├── Dockerfile
-├── docker-compose.yml
-└── README.md
-```
-
----
-
-## 🛠️ Technologies Used
-
-- **Backend**: Django 5.1, DRF
-- **AI/ML**: sentence-transformers (all-MiniLM-L6-v2)
-- **Task Queue**: Celery + Redis
-- **Database**: PostgreSQL (production) / SQLite (dev)
-- **Deployment**: Docker, Docker Compose, Nginx, Gunicorn
-- **Documentation**: drf-spectacular
-- **Auth**: djangorestframework-simplejwt
-
----
-
-## 🔧 Environment Variables
-
-Create `.env` file:
+Create `Backend/.env` (example):
 
 ```env
-DJANGO_SECRET_KEY=your-super-secret-key-here
+DJANGO_SECRET_KEY=replace-me
 DEBUG=True
 ALLOWED_HOSTS=localhost,127.0.0.1
+DATABASE_URL=sqlite:///db.sqlite3
 CELERY_BROKER_URL=redis://redis:6379/0
 CELERY_RESULT_BACKEND=redis://redis:6379/0
 ```
 
----
-
-## 📊 Future Enhancements (Bonus)
-
-- Email notifications (Celery + Django email)
-- WebSocket live screening progress
-- React.js admin dashboard
-- Interview scheduling module
-- Multi-tenant company support
-- pgvector for faster vector search
+Store secrets securely in production; the above is for local development.
 
 ---
 
-## 📄 License
+## Testing
 
-MIT License – Feel free to use for learning or commercial projects.
-
----
-
-**Built with ❤️ as a real SaaS product in 2026**
-
-Made by following clean architecture, reusable services, async processing, and production best practices.
+- Backend: run `python manage.py test` from `Backend/`.
+- Frontend: run `npm run test` (Vitest) from `Frontend/`.
 
 ---
 
-### How to Contribute
+## Project Structure
+
+- `Backend/` — Django project with apps for users, jobs, candidates, screening, analytics and Celery configuration.
+- `Frontend/` — Vite + React UI.
+- `Backend/docker/` — Docker and Nginx assets.
+
+---
+
+## Contributing
+
+Contributions welcome! Please open issues or PRs.
+
+Recommended workflow:
+
 1. Fork the repo
 2. Create a feature branch
-3. Make changes
-4. Submit a Pull Request
+3. Add tests for backend or vitest for frontend
+4. Open a pull request
 
 ---
 
-**Star this repo if you found it helpful!** ⭐
+## License
+
+MIT — see [LICENSE](LICENSE).
+
+---
+
+## Contact
+
+Maintainer: Maroof
+
+---
+
+Would you like me to:
+- add `Backend/README.md` and `Frontend/README.md` with folder-specific commands?
+- add a `docs/screenshot.png` placeholder image and `.env.example` file?
+
+
 
